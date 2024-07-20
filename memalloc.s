@@ -47,18 +47,27 @@ memory_alloc:
     cmpq $0, %rax
     jne _TRY_BREAK_BLOCK
 
+    addq $9, %rdi
     call sbrk
-    jmp _VALIDATE_BLOCK
+    addq $9, current_brk
+    addq %rbx, current_brk
 
-    _TRY_BREAK_BLOCK:
-
-
-    _VALIDATE_BLOCK:
     movb $1, (%rax)
     addq $1, %rax
     movq %rbx, (%rax)
-    addq $8, %rax
+    jmp _RETURN_MEMORY_ALLOC_F
 
+    _TRY_BREAK_BLOCK:
+    movq %rax, %r12
+    movq %rax, %rdi
+    movq %rbx, %rsi
+    call try_break_block
+    movq %r12, %rax
+    movb $1, (%rax)
+    addq $1, %rax
+
+    _RETURN_MEMORY_ALLOC_F:
+    addq $8, %rax
     popq %rbp
     ret
 
@@ -97,5 +106,28 @@ find_biggest_block_free:
         addq %r10, %r8
         jmp _FIND_WORST_FIT_LOOP
     _END_FIND_WORST_FIT_LOOP:
+    popq %rbp
+    ret
+
+# Tenta quebrar o bloco apontando por %rdi em dois, 
+# um com %rsi bytes e outro com o restante.
+try_break_block:
+    pushq %rbp
+    movq %rsp, %rbp
+    
+    addq $1, %rdi
+    movq (%rdi), %r9
+    subq %rsi, %r9
+    # Verifica se o bloco eh grande o suficiente
+    cmpq $9, %r9
+    jle _END_TRY_BREAK_BLOCK
+    movq %rsi, (%rdi)
+    addq $8, %rdi
+    addq %rsi, %rdi
+    movb $0, (%rdi)
+    addq $1, %rdi
+    subq $9, %r9
+    movq %r9, (%rdi)
+    _END_TRY_BREAK_BLOCK:
     popq %rbp
     ret
