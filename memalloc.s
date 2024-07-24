@@ -14,24 +14,30 @@ current_brk: .quad 0
 setup_brk:
     pushq %rbp
     movq %rsp, %rbp
+
     movq $0, %rdi
     call sbrk
     movq %rax, original_brk
     movq %rax, current_brk
+
     popq %rbp
     ret
 
 dismiss_brk:
     pushq %rbp
     movq %rsp, %rbp
-    movq original_brk, %r8
-    movq %r8, current_brk
+
+    movq original_brk, %rdi
+    movq %rdi, current_brk
+    call brk
+
     popq %rbp
     ret
 
 memory_free:
     pushq %rbp
     movq %rsp, %rbp
+
     subq $9, %rdi
     movb $0, (%rdi)
 
@@ -51,7 +57,6 @@ memory_alloc:
     call sbrk
     addq $9, current_brk
     addq %rbx, current_brk
-
     movb $1, (%rax)
     addq $1, %rax
     movq %rbx, (%rax)

@@ -6,6 +6,7 @@
 extern void *original_brk;	/* Você precisa ter a variável global que armazena o valor de brk como um extern aqui.
 							No código de teste estou chamandando de original_brk, mas se utilizarem outro nome,
 							substituir as ocorrências por ele aqui. */
+extern void *current_brk;
 
 int main() { 
 
@@ -53,6 +54,12 @@ int main() {
 	unsigned long long stack_var = 0;
 	unsigned int alloc_return = memory_free((void*) &stack_var);
 	if (!alloc_return) printf("\tO RETORNO DA LIBERAÇÃO FOI NULL!\n");
+
+
+    printf("Valor inicial brk: %p\n", original_brk);
+    printf("Valor final brk: %p\n", current_brk);
+    dismiss_brk();
+    printf("Valor brk apos dismiss: %p\n", current_brk);
 
 	return 0;
 }
