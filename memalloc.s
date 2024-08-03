@@ -53,6 +53,7 @@ memory_alloc:
     cmpq $0, %rax
     jne _TRY_BREAK_BLOCK
 
+    movq %rbx, %rdi
     addq $9, %rdi
     call sbrk
     addq $9, current_brk
